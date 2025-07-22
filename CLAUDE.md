@@ -64,6 +64,19 @@ npx prisma generate
 ./scripts/init-db.sh
 ```
 
+## 환경 설정
+
+`.env` 파일이 없을 경우 `.env.example`을 복사하여 생성합니다:
+```bash
+cp .env.example .env
+```
+
+필수 환경 변수:
+- `DATABASE_URL`: MySQL 연결 문자열
+- `REDIS_HOST`, `REDIS_PORT`: Redis 연결 정보
+- `JWT_SECRET`: JWT 토큰 서명 키
+- `SMTP_*`: 이메일 전송 설정
+
 ## 아키텍처 개요
 
 이 프로젝트는 **Domain-Driven Design (DDD)** 및 **Clean Architecture** 원칙을 따릅니다.
@@ -118,3 +131,18 @@ NestJS의 DI 컨테이너를 활용하여 인터페이스 기반 주입:
 ```
 
 모든 구현체는 모듈에서 Provider로 등록됩니다.
+
+## 프로젝트 구조
+
+```
+RoboversServer/
+├── libs/common/snowflake/     # Snowflake ID 생성기 라이브러리
+├── apps/user/                 # 사용자 서비스 모듈
+│   ├── src/
+│   │   ├── domain/           # 도메인 모델 및 비즈니스 로직
+│   │   ├── application/      # 유즈케이스 및 포트 정의
+│   │   ├── infrastructure/   # 외부 시스템 연동 구현체
+│   │   └── interfaces/       # REST API 및 DTO
+│   └── test/                 # 테스트 파일
+├── prisma/schema.prisma      # Prisma 데이터베이스 스키마
+└── scripts/                  # 개발 및 배포 스크립트
