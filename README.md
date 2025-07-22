@@ -1,5 +1,7 @@
 # Robovers Server
 
+![CodeRabbit Pull Request Reviews](https://img.shields.io/coderabbit/prs/github/leesh5000/RoboversServer?utm_source=oss&utm_medium=github&utm_campaign=leesh5000%2FRoboversServer&labelColor=171717&color=FF570A&link=https%3A%2F%2Fcoderabbit.ai&label=CodeRabbit+Reviews)
+
 > AI와 인간이 협업하여 만드는 신뢰할 수 있는 기술 지식 플랫폼 서버
 
 ## 🚀 프로젝트 개요
