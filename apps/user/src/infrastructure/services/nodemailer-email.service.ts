@@ -13,8 +13,8 @@ export class NodemailerEmailService implements EmailService {
       secure: false,
       auth: {
         user: process.env.SMTP_USER,
-        pass: process.env.SMTP_PASS
-      }
+        pass: process.env.SMTP_PASS,
+      },
     });
   }
 
@@ -35,7 +35,7 @@ export class NodemailerEmailService implements EmailService {
           <hr style="margin: 30px 0;">
           <p style="color: #666; font-size: 12px;">© 2024 Robovers. All rights reserved.</p>
         </div>
-      `
+      `,
     };
 
     await this.transporter.sendMail(mailOptions);

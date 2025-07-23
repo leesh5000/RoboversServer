@@ -6,20 +6,25 @@ import {
   HttpStatus,
   Param,
   UseGuards,
-  Request
+  Request,
 } from '@nestjs/common';
-import { ApiTags, ApiOperation, ApiResponse, ApiBearerAuth } from '@nestjs/swagger';
+import {
+  ApiTags,
+  ApiOperation,
+  ApiResponse,
+  ApiBearerAuth,
+} from '@nestjs/swagger';
 import {
   UserSignUpUseCase,
   UserLoginUseCase,
   VerifyEmailUseCase,
-  ResendVerificationCodeUseCase
+  ResendVerificationCodeUseCase,
 } from '../../application/use-cases';
 import {
   SignUpDto,
   LoginDto,
   VerifyEmailDto,
-  ResendVerificationCodeDto
+  ResendVerificationCodeDto,
 } from '../dto';
 import { JwtAuthGuard } from '../guards/jwt-auth.guard';
 
@@ -30,7 +35,7 @@ export class AuthController {
     private readonly userSignUpUseCase: UserSignUpUseCase,
     private readonly userLoginUseCase: UserLoginUseCase,
     private readonly verifyEmailUseCase: VerifyEmailUseCase,
-    private readonly resendVerificationCodeUseCase: ResendVerificationCodeUseCase
+    private readonly resendVerificationCodeUseCase: ResendVerificationCodeUseCase,
   ) {}
 
   @Post('sign-up')
@@ -41,7 +46,7 @@ export class AuthController {
     return this.userSignUpUseCase.execute({
       email: dto.email,
       password: dto.password,
-      nickname: dto.nickname
+      nickname: dto.nickname,
     });
   }
 
@@ -53,7 +58,7 @@ export class AuthController {
   async login(@Body() dto: LoginDto) {
     return this.userLoginUseCase.execute({
       email: dto.email,
-      password: dto.password
+      password: dto.password,
     });
   }
 
@@ -64,11 +69,11 @@ export class AuthController {
   @ApiResponse({ status: 400, description: '잘못된 인증 코드' })
   async verifyEmail(
     @Param('userId') userId: string,
-    @Body() dto: VerifyEmailDto
+    @Body() dto: VerifyEmailDto,
   ) {
     await this.verifyEmailUseCase.execute({
       userId,
-      code: dto.code
+      code: dto.code,
     });
   }
 
@@ -76,7 +81,7 @@ export class AuthController {
   @HttpCode(HttpStatus.NO_CONTENT)
   async resendVerificationCode(@Body() dto: ResendVerificationCodeDto) {
     await this.resendVerificationCodeUseCase.execute({
-      email: dto.email
+      email: dto.email,
     });
   }
 
@@ -86,7 +91,7 @@ export class AuthController {
   @ApiBearerAuth()
   @ApiOperation({ summary: '로그아웃' })
   @ApiResponse({ status: 204, description: '로그아웃 성공' })
-  async logout(@Request() req: any) {
+  async logout() {
     // JWT는 stateless이므로 클라이언트에서 토큰을 삭제하면 됨
     // 필요시 Redis에 블랙리스트 구현 가능
   }

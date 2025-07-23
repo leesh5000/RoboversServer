@@ -13,7 +13,7 @@ export class RedisService implements OnModuleDestroy {
       retryStrategy: (times: number) => {
         const delay = Math.min(times * 50, 2000);
         return delay;
-      }
+      },
     });
   }
 
@@ -40,6 +40,14 @@ export class RedisService implements OnModuleDestroy {
 
   async ttl(key: string): Promise<number> {
     return this.redis.ttl(key);
+  }
+
+  async incr(key: string): Promise<number> {
+    return this.redis.incr(key);
+  }
+
+  async expire(key: string, seconds: number): Promise<void> {
+    await this.redis.expire(key, seconds);
   }
 
   async onModuleDestroy() {

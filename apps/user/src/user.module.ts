@@ -11,7 +11,7 @@ import {
   UserSignUpUseCase,
   UserLoginUseCase,
   VerifyEmailUseCase,
-  ResendVerificationCodeUseCase
+  ResendVerificationCodeUseCase,
 } from './application/use-cases';
 
 // Repositories
@@ -24,30 +24,26 @@ import { RedisService } from './infrastructure/services/redis.service';
 import { BcryptPasswordService } from './infrastructure/services/bcrypt-password.service';
 import { JwtServiceImpl } from './infrastructure/services/jwt.service.impl';
 import { NodemailerEmailService } from './infrastructure/services/nodemailer-email.service';
+import { ConsoleEmailService } from './infrastructure/services/console-email.service';
 
 // Strategies
 import { JwtStrategy } from './interfaces/strategies/jwt.strategy';
 
-// Ports
-import {
-  UserRepository,
-  VerificationCodeRepository,
-  PasswordService,
-  JwtService,
-  EmailService
-} from './application/ports';
+// Ports imports are used for provider tokens
 
 @Module({
   imports: [
     ConfigModule.forRoot({
       isGlobal: true,
-      envFilePath: process.env.NODE_ENV === 'production' ? '.env' : 'apps/user/.env.user'
+      envFilePath:
+        process.env.NODE_ENV === 'production' ? '.env' : 'apps/user/.env.user',
     }),
     PassportModule,
     JwtModule.register({
-      secret: process.env.JWT_SECRET || 'your-secret-key-change-this-in-production',
-      signOptions: { expiresIn: process.env.JWT_EXPIRATION || '7d' }
-    })
+      secret:
+        process.env.JWT_SECRET || 'your-secret-key-change-this-in-production',
+      signOptions: { expiresIn: process.env.JWT_EXPIRATION || '7d' },
+    }),
   ],
   controllers: [AuthController],
   providers: [
@@ -65,30 +61,30 @@ import {
     // Repository Implementations
     {
       provide: 'UserRepository',
-      useClass: PrismaUserRepository
+      useClass: PrismaUserRepository,
     },
     {
       provide: 'VerificationCodeRepository',
-      useClass: RedisVerificationCodeRepository
+      useClass: RedisVerificationCodeRepository,
     },
 
     // Service Implementations
     {
       provide: 'PasswordService',
-      useClass: BcryptPasswordService
+      useClass: BcryptPasswordService,
     },
     {
       provide: 'JwtService',
-      useClass: JwtServiceImpl
+      useClass: JwtServiceImpl,
     },
     {
       provide: 'EmailService',
-      useClass: NodemailerEmailService
-    }
+      useClass:
+        process.env.NODE_ENV === 'production'
+          ? NodemailerEmailService
+          : ConsoleEmailService,
+    },
   ],
-  exports: [
-    'UserRepository',
-    'JwtService'
-  ]
+  exports: ['UserRepository', 'JwtService'],
 })
 export class UserModule {}

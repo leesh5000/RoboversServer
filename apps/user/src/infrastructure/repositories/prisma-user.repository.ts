@@ -18,7 +18,7 @@ export class PrismaUserRepository implements UserRepository {
         nickname: user.nickname,
         status: user.status,
         role: user.role,
-        updatedAt: user.updatedAt
+        updatedAt: user.updatedAt,
       },
       create: {
         id: user.id,
@@ -29,14 +29,14 @@ export class PrismaUserRepository implements UserRepository {
         status: user.status,
         role: user.role,
         createdAt: user.createdAt,
-        updatedAt: user.updatedAt
-      }
+        updatedAt: user.updatedAt,
+      },
     });
   }
 
   async findById(id: bigint): Promise<User | null> {
     const prismaUser = await this.prisma.user.findUnique({
-      where: { id }
+      where: { id },
     });
 
     return prismaUser ? this.toDomainModel(prismaUser) : null;
@@ -44,7 +44,7 @@ export class PrismaUserRepository implements UserRepository {
 
   async findByEmail(email: string): Promise<User | null> {
     const prismaUser = await this.prisma.user.findUnique({
-      where: { email: email.toLowerCase() }
+      where: { email: email.toLowerCase() },
     });
 
     return prismaUser ? this.toDomainModel(prismaUser) : null;
@@ -52,7 +52,7 @@ export class PrismaUserRepository implements UserRepository {
 
   async findByNickname(nickname: string): Promise<User | null> {
     const prismaUser = await this.prisma.user.findUnique({
-      where: { nickname }
+      where: { nickname },
     });
 
     return prismaUser ? this.toDomainModel(prismaUser) : null;
@@ -60,7 +60,7 @@ export class PrismaUserRepository implements UserRepository {
 
   async existsByEmail(email: string): Promise<boolean> {
     const count = await this.prisma.user.count({
-      where: { email: email.toLowerCase() }
+      where: { email: email.toLowerCase() },
     });
 
     return count > 0;
@@ -68,7 +68,7 @@ export class PrismaUserRepository implements UserRepository {
 
   async existsByNickname(nickname: string): Promise<boolean> {
     const count = await this.prisma.user.count({
-      where: { nickname }
+      where: { nickname },
     });
 
     return count > 0;
@@ -83,7 +83,7 @@ export class PrismaUserRepository implements UserRepository {
       status: prismaUser.status as UserStatus,
       role: prismaUser.role as UserRole,
       createdAt: prismaUser.createdAt,
-      updatedAt: prismaUser.updatedAt
+      updatedAt: prismaUser.updatedAt,
     });
   }
 }
