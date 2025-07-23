@@ -45,6 +45,12 @@ fi
 # AWS CLI 설치
 echo "☁️  Installing AWS CLI..."
 if ! command -v aws &> /dev/null; then
+    # unzip 설치 확인 및 설치
+    if ! command -v unzip &> /dev/null; then
+        echo "📦 Installing unzip..."
+        sudo apt-get install -y unzip
+    fi
+    
     curl "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o "awscliv2.zip"
     unzip awscliv2.zip
     sudo ./aws/install

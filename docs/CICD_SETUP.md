@@ -53,31 +53,93 @@ CI/CD용 IAM 사용자에게 다음 권한이 필요합니다:
 EC2 인스턴스에 SSH로 접속하여 다음 명령을 실행합니다:
 
 ```bash
-# 설정 스크립트 다운로드 및 실행
-curl -o setup-ec2.sh https://raw.githubusercontent.com/[your-repo]/main/scripts/setup-ec2.sh
+# 옵션 1: Public 저장소인 경우
+# [your-username]/[your-repo]를 실제 GitHub 사용자명과 저장소명으로 교체하세요
+# 예: leesh5000/RoboversServer
+curl -o setup-ec2.sh https://raw.githubusercontent.com/[your-username]/[your-repo]/main/scripts/setup-ec2.sh
+
+# 옵션 2: Private 저장소인 경우
+# GitHub Personal Access Token이 필요합니다
+# GitHub Settings > Developer settings > Personal access tokens에서 생성
+curl -H "Authorization: token YOUR_GITHUB_TOKEN" \
+     -o setup-ec2.sh \
+     https://raw.githubusercontent.com/[your-username]/[your-repo]/main/scripts/setup-ec2.sh
+
+# 또는 Private 저장소의 경우 먼저 저장소를 클론한 후 스크립트 실행
+git clone https://github.com/[your-username]/[your-repo].git
+cd [your-repo]
+cp scripts/setup-ec2.sh ~/
+cd ~
+
+# 스크립트 실행 권한 부여
 chmod +x setup-ec2.sh
+
+# 스크립트 실행 (반드시 ./ 를 붙여야 함)
 ./setup-ec2.sh
 ```
 
-### 4. 환경 변수 설정
+### 4. GitHub Secrets 설정
 
-EC2에서 `.env.production` 파일을 생성하고 실제 값으로 업데이트합니다:
+GitHub 리포지토리 설정에서 다음 Secrets를 추가합니다:
 
-```bash
-cd /home/ubuntu/robovers-server
-cp .env.production.example .env.production
-nano .env.production
+#### 필수 Secrets:
+- `AWS_ACCESS_KEY_ID`: AWS 액세스 키 ID
+- `AWS_SECRET_ACCESS_KEY`: AWS 시크릿 액세스 키
+- `AWS_ECR_REPOSITORY`: ECR 리포지토리 URL (예: `123456789.dkr.ecr.ap-northeast-2.amazonaws.com/robovers`)
+- `EC2_HOST`: EC2 인스턴스의 Public IP 또는 도메인
+- `EC2_USERNAME`: EC2 사용자명 (보통 `ubuntu`)
+- `EC2_SSH_KEY`: EC2 접속용 SSH 프라이빗 키
+- `ENV_PRODUCTION`: 프로덕션 환경 변수 (아래 형식 참조)
+
+#### ENV_PRODUCTION 형식:
+```env
+NODE_ENV=production
+PORT=4001
+
+# Database
+DB_PASSWORD=your-secure-password-here
+
+# Redis
+REDIS_PASSWORD=your-secure-redis-password-here
+
+# JWT
+JWT_SECRET=your-secure-jwt-secret-here
+JWT_EXPIRATION=7d
+
+# Email
+SMTP_HOST=smtp.gmail.com
+SMTP_PORT=587
+SMTP_USER=your-email@gmail.com
+SMTP_PASSWORD=your-app-password
+SMTP_FROM="Robovers <noreply@robovers.com>"
+
+# Snowflake
+SNOWFLAKE_NODE_ID=1
+
+# CORS
+CORS_ORIGIN=https://your-domain.com
 ```
 
-### 5. 필요한 파일 복사
+> **자동화 완료!** 이제 main 브랜치에 push하면:
+> - 자동으로 최신 코드가 EC2에 배포됩니다
+> - 환경 변수가 자동으로 설정됩니다
+> - Docker가 설치되어 있지 않으면 자동으로 설치됩니다
+> - 수동 작업이 전혀 필요하지 않습니다
 
-EC2 인스턴스에 다음 파일들을 복사합니다:
+### 5. 초기 EC2 설정 (한 번만 수행)
+
+EC2 인스턴스에 처음 접속하여 기본 설정만 수행합니다:
 
 ```bash
-# 로컬에서 EC2로 파일 복사
-scp docker-compose.production.yml ubuntu@[EC2_HOST]:/home/ubuntu/robovers-server/
-scp scripts/deploy-ec2.sh ubuntu@[EC2_HOST]:/home/ubuntu/robovers-server/scripts/
+# SSH로 EC2 접속
+ssh ubuntu@[EC2_HOST]
+
+# Git 설치 (이미 설치되어 있을 수 있음)
+sudo apt-get update
+sudo apt-get install -y git
 ```
+
+> **참고**: 이후 모든 파일과 설정은 GitHub Actions가 자동으로 처리합니다!
 
 ## 배포 프로세스
 

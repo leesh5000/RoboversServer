@@ -87,9 +87,37 @@ jobs:
           username: ${{ secrets.EC2_USERNAME }}
           key: ${{ secrets.EC2_SSH_KEY }}
           script: |
+            # 프로젝트 디렉토리 확인 및 생성
+            if [ ! -d "/home/ubuntu/robovers-server" ]; then
+              echo "📁 Creating project directory..."
+              git clone https://github.com/${{ github.repository }}.git /home/ubuntu/robovers-server
+            fi
+            
+            cd /home/ubuntu/robovers-server
+            
+            # 최신 코드 가져오기
+            echo "🔄 Pulling latest code..."
+            git pull origin main
+            
+            # 스크립트 실행 권한 부여
+            chmod +x scripts/*.sh
+            
+            # 환경 변수 파일 생성 (GitHub Secrets 사용)
+            echo "📝 Creating environment file..."
+            cat > .env.production << 'EOF'
+            ${{ secrets.ENV_PRODUCTION }}
+            EOF
+            
+            # Docker 및 Docker Compose 설치 확인
+            if ! command -v docker &> /dev/null; then
+              echo "🐳 Docker not found. Running setup script..."
+              ./scripts/setup-ec2.sh
+            fi
+            
             # ECR 로그인
+            echo "🔐 Logging in to ECR..."
             aws ecr get-login-password --region ${{ env.AWS_REGION }} | docker login --username AWS --password-stdin ${{ env.ECR_REPOSITORY }}
             
             # 배포 스크립트 실행
-            cd /home/ubuntu/robovers-server
+            echo "🚀 Running deployment script..."
             ./scripts/deploy-ec2.sh ${{ env.ECR_REPOSITORY }}:${{ env.IMAGE_TAG }}
