@@ -39,15 +39,3 @@ model User {
   @@index([nickname])
   @@index([status])
 }
-
-model VerificationCode {
-  id        BigInt   @id
-  userId    BigInt
-  code      String
-  expiresAt DateTime
-  createdAt DateTime @default(now())
-
-  @@map("verification_codes")
-  @@index([userId, code])
-  @@index([expiresAt])
-}
