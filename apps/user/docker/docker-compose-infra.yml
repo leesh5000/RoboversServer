@@ -1,0 +1,53 @@
+version: '3.8'
+
+services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: robovers-user-db
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: ${DB_USER:-robovers}
+      POSTGRES_PASSWORD: ${DB_PASSWORD:-robovers}
+      POSTGRES_DB: robovers-user
+      TZ: Asia/Seoul
+    ports:
+      - "25432:5432"
+    volumes:
+      - robovers-user-postgres-data:/var/lib/postgresql/data
+      - ./init.sql:/docker-entrypoint-initdb.d/init.sql
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${DB_USER:-postgres}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - robovers-user-network
+
+  redis:
+    image: redis:7-alpine
+    container_name: robovers-user-redis
+    restart: unless-stopped
+    environment:
+      - REDIS_PASSWORD=${REDIS_PASSWORD:-userServiceRedisPassword}
+    ports:
+      - "26379:6379"
+    volumes:
+      - robovers-user-redis-data:/data
+    command: redis-server --appendonly yes --requirepass ${REDIS_PASSWORD:-userServiceRedisPassword}
+    healthcheck:
+      test: ["CMD", "redis-cli", "-a", "${REDIS_PASSWORD:-userServiceRedisPassword}", "ping"]
+      timeout: 5s
+      retries: 10
+    networks:
+      - robovers-user-network
+
+volumes:
+  robovers-user-postgres-data:
+    name: robovers-user-postgres-data
+  robovers-user-redis-data:
+    name: robovers-user-redis-data
+
+networks:
+  robovers-user-network:
+    name: robovers-user-network
+    driver: bridge
