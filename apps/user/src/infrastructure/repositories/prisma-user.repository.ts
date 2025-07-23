@@ -33,7 +33,11 @@ export class PrismaUserRepository implements UserRepository {
       },
     };
 
-    await this.prisma.user.upsert(upsertData);
+    await (
+      this.prisma.user.upsert as (
+        args: Prisma.UserUpsertArgs,
+      ) => Promise<PrismaUser>
+    )(upsertData);
   }
 
   async findById(id: bigint): Promise<User | null> {
@@ -41,7 +45,11 @@ export class PrismaUserRepository implements UserRepository {
       where: { id },
     };
 
-    const prismaUser = await this.prisma.user.findUnique(findArgs);
+    const prismaUser = await (
+      this.prisma.user.findUnique as (
+        args: Prisma.UserFindUniqueArgs,
+      ) => Promise<PrismaUser | null>
+    )(findArgs);
 
     return prismaUser ? this.toDomainModel(prismaUser) : null;
   }
@@ -51,7 +59,11 @@ export class PrismaUserRepository implements UserRepository {
       where: { email: email.toLowerCase() },
     };
 
-    const prismaUser = await this.prisma.user.findUnique(findArgs);
+    const prismaUser = await (
+      this.prisma.user.findUnique as (
+        args: Prisma.UserFindUniqueArgs,
+      ) => Promise<PrismaUser | null>
+    )(findArgs);
 
     return prismaUser ? this.toDomainModel(prismaUser) : null;
   }
@@ -61,7 +73,11 @@ export class PrismaUserRepository implements UserRepository {
       where: { nickname },
     };
 
-    const prismaUser = await this.prisma.user.findUnique(findArgs);
+    const prismaUser = await (
+      this.prisma.user.findUnique as (
+        args: Prisma.UserFindUniqueArgs,
+      ) => Promise<PrismaUser | null>
+    )(findArgs);
 
     return prismaUser ? this.toDomainModel(prismaUser) : null;
   }
@@ -71,7 +87,9 @@ export class PrismaUserRepository implements UserRepository {
       where: { email: email.toLowerCase() },
     };
 
-    const count = await this.prisma.user.count(countArgs);
+    const count = await (
+      this.prisma.user.count as (args: Prisma.UserCountArgs) => Promise<number>
+    )(countArgs);
 
     return count > 0;
   }
@@ -81,13 +99,19 @@ export class PrismaUserRepository implements UserRepository {
       where: { nickname },
     };
 
-    const count = await this.prisma.user.count(countArgs);
+    const count = await (
+      this.prisma.user.count as (args: Prisma.UserCountArgs) => Promise<number>
+    )(countArgs);
 
     return count > 0;
   }
 
   private toDomainModel(prismaUser: PrismaUser): User {
-    // Prisma의 enum 타입이 도메인 enum과 일치함을 확인
+    // 명시적 타입 검증으로 타입 안전성 확보
+    if (!prismaUser || typeof prismaUser !== 'object') {
+      throw new Error('Invalid Prisma user data');
+    }
+
     const userStatus = prismaUser.status as UserStatus;
     const userRole = prismaUser.role as UserRole;
 

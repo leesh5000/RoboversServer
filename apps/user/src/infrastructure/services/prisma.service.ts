@@ -2,15 +2,14 @@ import { Injectable, OnModuleInit, OnModuleDestroy } from '@nestjs/common';
 import { PrismaClient, Prisma } from '@prisma/client';
 
 @Injectable()
-export class PrismaService
-  extends PrismaClient<
+export class PrismaService implements OnModuleInit, OnModuleDestroy {
+  private readonly _client: PrismaClient<
     Prisma.PrismaClientOptions,
     'query' | 'info' | 'warn' | 'error'
-  >
-  implements OnModuleInit, OnModuleDestroy
-{
+  >;
+
   constructor() {
-    super({
+    this._client = new PrismaClient({
       log:
         process.env.NODE_ENV === 'development'
           ? ['query', 'info', 'warn', 'error']
@@ -18,11 +17,15 @@ export class PrismaService
     });
   }
 
+  get user() {
+    return this._client.user;
+  }
+
   async onModuleInit(): Promise<void> {
-    await this.$connect();
+    await this._client.$connect();
   }
 
   async onModuleDestroy(): Promise<void> {
-    await this.$disconnect();
+    await this._client.$disconnect();
   }
 }
