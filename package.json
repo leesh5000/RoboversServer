@@ -33,7 +33,8 @@
     "docker:build:user": "docker build -f apps/user/docker/Dockerfile -t robovers-user:latest .",
     "docker:up:user": "docker-compose -p robovers-user -f apps/user/docker/docker-compose-infra.yml up -d",
     "docker:down:user": "docker-compose -p robovers-user -f apps/user/docker/docker-compose-infra.yml down",
-    "docker:logs:user": "docker-compose -p robovers-user -f apps/user/docker/docker-compose-infra.yml logs -f"
+    "docker:logs:user": "docker-compose -p robovers-user -f apps/user/docker/docker-compose-infra.yml logs -f",
+    "postinstall": "prisma generate --schema=apps/user/prisma/schema.prisma"
   },
   "dependencies": {
     "@nestjs/common": "^11.0.1",
