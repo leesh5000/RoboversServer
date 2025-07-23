@@ -39,12 +39,12 @@ export REDIS_PORT=26379
 export REDIS_PASSWORD=userServiceRedisPassword
 export JWT_SECRET=user-service-secret-key-change-this-in-production
 export JWT_EXPIRATION=7d
-export PORT=4001
+export PORT=5000
 
 # 5. User 서비스 실행
 echo "🚀 Starting User Service application..."
-echo "📍 Service will be available at: http://localhost:4001"
-echo "📚 API documentation: http://localhost:4001/api/docs"
+echo "📍 Service will be available at: http://localhost:5000"
+echo "📚 API documentation: http://localhost:5000/api/docs"
 echo ""
 echo "Press Ctrl+C to stop all services"
 echo ""

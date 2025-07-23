@@ -1,12 +1,12 @@
 /**
  * Snowflake ID Generator
- * 
+ *
  * 64-bit ID 구조:
  * - 1 bit: 부호 비트 (항상 0)
  * - 41 bits: 타임스탬프 (밀리초)
  * - 10 bits: 노드 ID (0-1023)
  * - 12 bits: 시퀀스 번호 (0-4095)
- * 
+ *
  * 초당 최대 409만개의 고유 ID 생성 가능
  */
 
@@ -14,16 +14,20 @@ export class SnowflakeIdGenerator {
   private static readonly EPOCH = 1640995200000n; // 2022-01-01 00:00:00 UTC
   private static readonly NODE_ID_BITS = 10n;
   private static readonly SEQUENCE_BITS = 12n;
-  private static readonly MAX_NODE_ID = (1n << SnowflakeIdGenerator.NODE_ID_BITS) - 1n;
-  private static readonly MAX_SEQUENCE = (1n << SnowflakeIdGenerator.SEQUENCE_BITS) - 1n;
-  
+  private static readonly MAX_NODE_ID =
+    (1n << SnowflakeIdGenerator.NODE_ID_BITS) - 1n;
+  private static readonly MAX_SEQUENCE =
+    (1n << SnowflakeIdGenerator.SEQUENCE_BITS) - 1n;
+
   private readonly nodeId: bigint;
   private sequence = 0n;
   private lastTimestamp = -1n;
 
   constructor(nodeId: number) {
     if (nodeId < 0 || nodeId > Number(SnowflakeIdGenerator.MAX_NODE_ID)) {
-      throw new Error(`Node ID must be between 0 and ${SnowflakeIdGenerator.MAX_NODE_ID}`);
+      throw new Error(
+        `Node ID must be between 0 and ${SnowflakeIdGenerator.MAX_NODE_ID}`,
+      );
     }
     this.nodeId = BigInt(nodeId);
   }
@@ -49,9 +53,13 @@ export class SnowflakeIdGenerator {
 
     this.lastTimestamp = timestamp;
 
-    return ((timestamp - SnowflakeIdGenerator.EPOCH) << (SnowflakeIdGenerator.NODE_ID_BITS + SnowflakeIdGenerator.SEQUENCE_BITS))
-      | (this.nodeId << SnowflakeIdGenerator.SEQUENCE_BITS)
-      | this.sequence;
+    return (
+      ((timestamp - SnowflakeIdGenerator.EPOCH) <<
+        (SnowflakeIdGenerator.NODE_ID_BITS +
+          SnowflakeIdGenerator.SEQUENCE_BITS)) |
+      (this.nodeId << SnowflakeIdGenerator.SEQUENCE_BITS) |
+      this.sequence
+    );
   }
 
   /**
@@ -65,7 +73,11 @@ export class SnowflakeIdGenerator {
    * ID에서 타임스탬프 추출
    */
   public static extractTimestamp(id: bigint): Date {
-    const timestamp = (id >> (SnowflakeIdGenerator.NODE_ID_BITS + SnowflakeIdGenerator.SEQUENCE_BITS)) + SnowflakeIdGenerator.EPOCH;
+    const timestamp =
+      (id >>
+        (SnowflakeIdGenerator.NODE_ID_BITS +
+          SnowflakeIdGenerator.SEQUENCE_BITS)) +
+      SnowflakeIdGenerator.EPOCH;
     return new Date(Number(timestamp));
   }
 
@@ -73,7 +85,10 @@ export class SnowflakeIdGenerator {
    * ID에서 노드 ID 추출
    */
   public static extractNodeId(id: bigint): number {
-    return Number((id >> SnowflakeIdGenerator.SEQUENCE_BITS) & SnowflakeIdGenerator.MAX_NODE_ID);
+    return Number(
+      (id >> SnowflakeIdGenerator.SEQUENCE_BITS) &
+        SnowflakeIdGenerator.MAX_NODE_ID,
+    );
   }
 
   /**
@@ -102,7 +117,7 @@ export class SnowflakeIdGenerator {
 export enum NodeIdStrategy {
   ENVIRONMENT = 'environment',
   STATIC = 'static',
-  RANDOM = 'random'
+  RANDOM = 'random',
 }
 
 /**
@@ -114,7 +129,10 @@ export class SnowflakeFactory {
   /**
    * 싱글톤 인스턴스 생성
    */
-  public static create(strategy: NodeIdStrategy = NodeIdStrategy.ENVIRONMENT, staticNodeId?: number): SnowflakeIdGenerator {
+  public static create(
+    strategy: NodeIdStrategy = NodeIdStrategy.ENVIRONMENT,
+    staticNodeId?: number,
+  ): SnowflakeIdGenerator {
     if (!this.instance) {
       const nodeId = this.determineNodeId(strategy, staticNodeId);
       this.instance = new SnowflakeIdGenerator(nodeId);
@@ -125,9 +143,12 @@ export class SnowflakeFactory {
   /**
    * 노드 ID 결정
    */
-  private static determineNodeId(strategy: NodeIdStrategy, staticNodeId?: number): number {
+  private static determineNodeId(
+    strategy: NodeIdStrategy,
+    staticNodeId?: number,
+  ): number {
     switch (strategy) {
-      case NodeIdStrategy.ENVIRONMENT:
+      case NodeIdStrategy.ENVIRONMENT: {
         const envNodeId = process.env.SNOWFLAKE_NODE_ID;
         if (!envNodeId) {
           throw new Error('SNOWFLAKE_NODE_ID environment variable not set');
@@ -137,18 +158,20 @@ export class SnowflakeFactory {
           throw new Error('SNOWFLAKE_NODE_ID must be a valid number');
         }
         return nodeId;
+      }
 
-      case NodeIdStrategy.STATIC:
+      case NodeIdStrategy.STATIC: {
         if (staticNodeId === undefined) {
           throw new Error('Static node ID not provided');
         }
         return staticNodeId;
+      }
 
       case NodeIdStrategy.RANDOM:
         return Math.floor(Math.random() * 1024); // MAX_NODE_ID + 1
 
       default:
-        throw new Error(`Unknown node ID strategy: ${strategy}`);
+        throw new Error(`Unknown node ID strategy: ${String(strategy)}`);
     }
   }
 

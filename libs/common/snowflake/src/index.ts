@@ -1,1 +1,5 @@
-export { SnowflakeIdGenerator, SnowflakeFactory, NodeIdStrategy } from './snowflake';
+export {
+  SnowflakeIdGenerator,
+  SnowflakeFactory,
+  NodeIdStrategy,
+} from './snowflake';

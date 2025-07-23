@@ -1,4 +1,8 @@
-import { SnowflakeIdGenerator, SnowflakeFactory, NodeIdStrategy } from './snowflake';
+import {
+  SnowflakeIdGenerator,
+  SnowflakeFactory,
+  NodeIdStrategy,
+} from './snowflake';
 
 describe('SnowflakeIdGenerator', () => {
   let generator: SnowflakeIdGenerator;
@@ -15,8 +19,12 @@ describe('SnowflakeIdGenerator', () => {
     });
 
     it('should throw error for invalid node ID', () => {
-      expect(() => new SnowflakeIdGenerator(-1)).toThrow('Node ID must be between 0 and 1023');
-      expect(() => new SnowflakeIdGenerator(1024)).toThrow('Node ID must be between 0 and 1023');
+      expect(() => new SnowflakeIdGenerator(-1)).toThrow(
+        'Node ID must be between 0 and 1023',
+      );
+      expect(() => new SnowflakeIdGenerator(1024)).toThrow(
+        'Node ID must be between 0 and 1023',
+      );
     });
   });
 
@@ -41,7 +49,8 @@ describe('SnowflakeIdGenerator', () => {
 
     it('should handle sequence overflow', () => {
       // Force sequence to max value
-      (generator as any).sequence = 4095n;
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+      (generator as any)['sequence'] = 4095n;
       const id1 = generator.generate();
       const id2 = generator.generate();
 
@@ -65,8 +74,12 @@ describe('SnowflakeIdGenerator', () => {
 
       const extractedTime = SnowflakeIdGenerator.extractTimestamp(id);
 
-      expect(extractedTime.getTime()).toBeGreaterThanOrEqual(beforeGenerate.getTime());
-      expect(extractedTime.getTime()).toBeLessThanOrEqual(afterGenerate.getTime());
+      expect(extractedTime.getTime()).toBeGreaterThanOrEqual(
+        beforeGenerate.getTime(),
+      );
+      expect(extractedTime.getTime()).toBeLessThanOrEqual(
+        afterGenerate.getTime(),
+      );
     });
   });
 
@@ -125,14 +138,16 @@ describe('SnowflakeFactory', () => {
     });
 
     it('should throw error when environment variable not set', () => {
-      expect(() => SnowflakeFactory.create(NodeIdStrategy.ENVIRONMENT))
-        .toThrow('SNOWFLAKE_NODE_ID environment variable not set');
+      expect(() => SnowflakeFactory.create(NodeIdStrategy.ENVIRONMENT)).toThrow(
+        'SNOWFLAKE_NODE_ID environment variable not set',
+      );
     });
 
     it('should throw error when environment variable is invalid', () => {
       process.env.SNOWFLAKE_NODE_ID = 'invalid';
-      expect(() => SnowflakeFactory.create(NodeIdStrategy.ENVIRONMENT))
-        .toThrow('SNOWFLAKE_NODE_ID must be a valid number');
+      expect(() => SnowflakeFactory.create(NodeIdStrategy.ENVIRONMENT)).toThrow(
+        'SNOWFLAKE_NODE_ID must be a valid number',
+      );
     });
   });
 
@@ -145,8 +160,9 @@ describe('SnowflakeFactory', () => {
     });
 
     it('should throw error when static node ID not provided', () => {
-      expect(() => SnowflakeFactory.create(NodeIdStrategy.STATIC))
-        .toThrow('Static node ID not provided');
+      expect(() => SnowflakeFactory.create(NodeIdStrategy.STATIC)).toThrow(
+        'Static node ID not provided',
+      );
     });
   });
 
@@ -173,7 +189,7 @@ describe('SnowflakeFactory', () => {
     it('should create new instance after reset', () => {
       process.env.SNOWFLAKE_NODE_ID = '100';
       const gen1 = SnowflakeFactory.create(NodeIdStrategy.ENVIRONMENT);
-      
+
       SnowflakeFactory.reset();
       const gen2 = SnowflakeFactory.create(NodeIdStrategy.ENVIRONMENT);
 
