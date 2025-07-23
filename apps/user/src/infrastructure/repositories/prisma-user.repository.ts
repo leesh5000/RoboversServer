@@ -33,11 +33,7 @@ export class PrismaUserRepository implements UserRepository {
       },
     };
 
-    await (
-      this.prisma.user.upsert as (
-        args: Prisma.UserUpsertArgs,
-      ) => Promise<PrismaUser>
-    )(upsertData);
+    await this.prisma.user.upsert(upsertData as any);
   }
 
   async findById(id: bigint): Promise<User | null> {
@@ -45,11 +41,7 @@ export class PrismaUserRepository implements UserRepository {
       where: { id },
     };
 
-    const prismaUser = await (
-      this.prisma.user.findUnique as (
-        args: Prisma.UserFindUniqueArgs,
-      ) => Promise<PrismaUser | null>
-    )(findArgs);
+    const prismaUser = await this.prisma.user.findUnique(findArgs as any) as PrismaUser | null;
 
     return prismaUser ? this.toDomainModel(prismaUser) : null;
   }
@@ -59,11 +51,7 @@ export class PrismaUserRepository implements UserRepository {
       where: { email: email.toLowerCase() },
     };
 
-    const prismaUser = await (
-      this.prisma.user.findUnique as (
-        args: Prisma.UserFindUniqueArgs,
-      ) => Promise<PrismaUser | null>
-    )(findArgs);
+    const prismaUser = await this.prisma.user.findUnique(findArgs as any) as PrismaUser | null;
 
     return prismaUser ? this.toDomainModel(prismaUser) : null;
   }
@@ -73,11 +61,7 @@ export class PrismaUserRepository implements UserRepository {
       where: { nickname },
     };
 
-    const prismaUser = await (
-      this.prisma.user.findUnique as (
-        args: Prisma.UserFindUniqueArgs,
-      ) => Promise<PrismaUser | null>
-    )(findArgs);
+    const prismaUser = await this.prisma.user.findUnique(findArgs as any) as PrismaUser | null;
 
     return prismaUser ? this.toDomainModel(prismaUser) : null;
   }
@@ -87,9 +71,7 @@ export class PrismaUserRepository implements UserRepository {
       where: { email: email.toLowerCase() },
     };
 
-    const count = await (
-      this.prisma.user.count as (args: Prisma.UserCountArgs) => Promise<number>
-    )(countArgs);
+    const count = await this.prisma.user.count(countArgs as any);
 
     return count > 0;
   }
@@ -99,9 +81,7 @@ export class PrismaUserRepository implements UserRepository {
       where: { nickname },
     };
 
-    const count = await (
-      this.prisma.user.count as (args: Prisma.UserCountArgs) => Promise<number>
-    )(countArgs);
+    const count = await this.prisma.user.count(countArgs as any);
 
     return count > 0;
   }
