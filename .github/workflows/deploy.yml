@@ -11,7 +11,7 @@ on:
 
 env:
   AWS_REGION: ap-northeast-2
-  ECR_REPOSITORY: 127994096408.dkr.ecr.ap-northeast-2.amazonaws.com/helloc
+  ECR_REPOSITORY: ${{ secrets.AWS_ECR_REPOSITORY }}
   IMAGE_TAG: ${{ github.sha }}
 
 jobs:
