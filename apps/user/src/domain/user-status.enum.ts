@@ -3,5 +3,5 @@ export enum UserStatus {
   PENDING = 'PENDING',
   BANNED = 'BANNED',
   DORMANT = 'DORMANT',
-  DELETED = 'DELETED'
+  DELETED = 'DELETED',
 }

@@ -21,7 +21,7 @@ export class User {
   public static create(props: UserProps): User {
     this.validateNickname(props.nickname);
     this.validatePassword(props.password);
-    
+
     return new User(props);
   }
 
@@ -97,7 +97,7 @@ export class User {
     return User.create({
       ...this.props,
       status: UserStatus.ACTIVE,
-      updatedAt: new Date()
+      updatedAt: new Date(),
     });
   }
 
@@ -109,7 +109,7 @@ export class User {
     return User.create({
       ...this.props,
       status: UserStatus.BANNED,
-      updatedAt: new Date()
+      updatedAt: new Date(),
     });
   }
 
@@ -119,7 +119,7 @@ export class User {
     return User.create({
       ...this.props,
       password: newPassword,
-      updatedAt: new Date()
+      updatedAt: new Date(),
     });
   }
 
@@ -129,7 +129,7 @@ export class User {
     return User.create({
       ...this.props,
       nickname: newNickname,
-      updatedAt: new Date()
+      updatedAt: new Date(),
     });
   }
 }

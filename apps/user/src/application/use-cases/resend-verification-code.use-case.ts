@@ -1,6 +1,11 @@
 import { Injectable, Inject } from '@nestjs/common';
 import { VerificationCode } from '../../domain';
-import { UserRepository, VerificationCodeRepository, EmailService } from '../ports';
+import {
+  UserRepository,
+  VerificationCodeRepository,
+  EmailService,
+} from '../ports';
+import { randomUUID } from 'crypto';
 
 export interface ResendVerificationCodeCommand {
   email: string;
@@ -10,13 +15,16 @@ export interface ResendVerificationCodeCommand {
 export class ResendVerificationCodeUseCase {
   constructor(
     @Inject('UserRepository') private readonly userRepository: UserRepository,
-    @Inject('VerificationCodeRepository') private readonly verificationCodeRepository: VerificationCodeRepository,
-    @Inject('EmailService') private readonly emailService: EmailService
+    @Inject('VerificationCodeRepository')
+    private readonly verificationCodeRepository: VerificationCodeRepository,
+    @Inject('EmailService') private readonly emailService: EmailService,
   ) {}
 
   async execute(command: ResendVerificationCodeCommand): Promise<void> {
     // 사용자 조회
-    const user = await this.userRepository.findByEmail(command.email.toLowerCase());
+    const user = await this.userRepository.findByEmail(
+      command.email.toLowerCase(),
+    );
     if (!user) {
       // 보안상 존재하지 않는 이메일에 대해서도 동일한 응답
       return;
@@ -31,12 +39,16 @@ export class ResendVerificationCodeUseCase {
     await this.verificationCodeRepository.deleteByUserId(user.id);
 
     // 새 인증 코드 생성
-    const newVerificationCode = VerificationCode.generate();
+    const verificationCodeId = randomUUID();
+    const newVerificationCode = VerificationCode.generate(verificationCodeId);
 
     // 저장 및 이메일 발송
     await Promise.all([
       this.verificationCodeRepository.save(user.id, newVerificationCode),
-      this.emailService.sendVerificationEmail(user.email.getValue(), newVerificationCode.getValue())
+      this.emailService.sendVerificationEmail(
+        user.email.getValue(),
+        newVerificationCode.getValue(),
+      ),
     ]);
   }
 }

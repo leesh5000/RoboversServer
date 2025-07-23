@@ -1,7 +1,14 @@
+/* eslint-disable @typescript-eslint/unbound-method */
+/* eslint-disable @typescript-eslint/no-unsafe-assignment */
 import { Test } from '@nestjs/testing';
 import { UserSignUpUseCase } from './user-sign-up.use-case';
-import { UserRepository, VerificationCodeRepository, EmailService, PasswordService } from '../ports';
-import { User, UserEmail, UserStatus, UserRole } from '../../domain';
+import {
+  UserRepository,
+  VerificationCodeRepository,
+  EmailService,
+  PasswordService,
+} from '../ports';
+import { UserStatus, UserRole } from '../../domain';
 
 describe('UserSignUpUseCase', () => {
   let useCase: UserSignUpUseCase;
@@ -9,6 +16,14 @@ describe('UserSignUpUseCase', () => {
   let verificationCodeRepository: jest.Mocked<VerificationCodeRepository>;
   let emailService: jest.Mocked<EmailService>;
   let passwordService: jest.Mocked<PasswordService>;
+
+  beforeAll(() => {
+    process.env.SNOWFLAKE_NODE_ID = '1';
+  });
+
+  afterAll(() => {
+    delete process.env.SNOWFLAKE_NODE_ID;
+  });
 
   beforeEach(async () => {
     const module = await Test.createTestingModule({
@@ -19,28 +34,29 @@ describe('UserSignUpUseCase', () => {
           useValue: {
             save: jest.fn(),
             existsByEmail: jest.fn(),
-            existsByNickname: jest.fn()
-          }
+            existsByNickname: jest.fn(),
+          },
         },
         {
           provide: 'VerificationCodeRepository',
           useValue: {
-            save: jest.fn()
-          }
+            save: jest.fn(),
+            saveWithEmailRateLimit: jest.fn(),
+          },
         },
         {
           provide: 'EmailService',
           useValue: {
-            sendVerificationEmail: jest.fn()
-          }
+            sendVerificationEmail: jest.fn(),
+          },
         },
         {
           provide: 'PasswordService',
           useValue: {
-            hash: jest.fn()
-          }
-        }
-      ]
+            hash: jest.fn(),
+          },
+        },
+      ],
     }).compile();
 
     useCase = module.get<UserSignUpUseCase>(UserSignUpUseCase);
@@ -54,7 +70,7 @@ describe('UserSignUpUseCase', () => {
     const command = {
       email: 'test@example.com',
       password: 'password123',
-      nickname: '테스트유저'
+      nickname: '테스트유저',
     };
 
     beforeEach(() => {
@@ -80,38 +96,52 @@ describe('UserSignUpUseCase', () => {
           email: expect.objectContaining({ value: command.email }),
           nickname: command.nickname,
           status: UserStatus.PENDING,
-          role: UserRole.USER
-        })
+          role: UserRole.USER,
+        }),
       );
-      expect(verificationCodeRepository.save).toHaveBeenCalled();
+      expect(
+        verificationCodeRepository.saveWithEmailRateLimit,
+      ).toHaveBeenCalledWith(
+        expect.any(BigInt),
+        command.email,
+        expect.any(Object),
+      );
       expect(emailService.sendVerificationEmail).toHaveBeenCalledWith(
         command.email,
-        expect.stringMatching(/^\d{6}$/)
+        expect.stringMatching(/^\d{6}$/),
       );
     });
 
     it('should throw error when email already exists', async () => {
       userRepository.existsByEmail.mockResolvedValue(true);
 
-      await expect(useCase.execute(command)).rejects.toThrow('이미 사용 중인 이메일입니다');
+      await expect(useCase.execute(command)).rejects.toThrow(
+        '이미 사용 중인 이메일입니다',
+      );
     });
 
     it('should throw error when nickname already exists', async () => {
       userRepository.existsByNickname.mockResolvedValue(true);
 
-      await expect(useCase.execute(command)).rejects.toThrow('이미 사용 중인 닉네임입니다');
+      await expect(useCase.execute(command)).rejects.toThrow(
+        '이미 사용 중인 닉네임입니다',
+      );
     });
 
     it('should throw error for invalid email format', async () => {
       const invalidCommand = { ...command, email: 'invalid-email' };
 
-      await expect(useCase.execute(invalidCommand)).rejects.toThrow('유효하지 않은 이메일 형식입니다');
+      await expect(useCase.execute(invalidCommand)).rejects.toThrow(
+        '유효하지 않은 이메일 형식입니다',
+      );
     });
 
     it('should throw error for invalid nickname', async () => {
       const invalidCommand = { ...command, nickname: 'a' };
 
-      await expect(useCase.execute(invalidCommand)).rejects.toThrow('닉네임은 2-20자의 한글, 영문, 숫자만 사용 가능합니다');
+      await expect(useCase.execute(invalidCommand)).rejects.toThrow(
+        '닉네임은 2-20자의 한글, 영문, 숫자만 사용 가능합니다',
+      );
     });
   });
 });

@@ -3,19 +3,24 @@ export class VerificationCode {
   private static readonly EXPIRATION_MINUTES = 5;
 
   private constructor(
+    private readonly id: string,
     private readonly value: string,
-    private readonly expiresAt: Date
+    private readonly expiresAt: Date,
   ) {}
 
-  public static generate(): VerificationCode {
+  public static generate(id: string): VerificationCode {
     const code = this.generateRandomCode();
     const expiresAt = new Date();
     expiresAt.setMinutes(expiresAt.getMinutes() + this.EXPIRATION_MINUTES);
-    
-    return new VerificationCode(code, expiresAt);
+
+    return new VerificationCode(id, code, expiresAt);
   }
 
-  public static fromValue(code: string, expiresAt: Date): VerificationCode {
+  public static fromValue(
+    id: string,
+    code: string,
+    expiresAt: Date,
+  ): VerificationCode {
     if (!code || code.length !== this.CODE_LENGTH) {
       throw new Error(`인증 코드는 ${this.CODE_LENGTH}자리여야 합니다`);
     }
@@ -24,7 +29,7 @@ export class VerificationCode {
       throw new Error('인증 코드는 숫자로만 구성되어야 합니다');
     }
 
-    return new VerificationCode(code, expiresAt);
+    return new VerificationCode(id, code, expiresAt);
   }
 
   private static generateRandomCode(): string {
@@ -32,6 +37,10 @@ export class VerificationCode {
     const max = Math.pow(10, this.CODE_LENGTH) - 1;
     const code = Math.floor(Math.random() * (max - min + 1)) + min;
     return code.toString();
+  }
+
+  public getId(): string {
+    return this.id;
   }
 
   public getValue(): string {

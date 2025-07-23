@@ -10,7 +10,8 @@ export interface VerifyEmailCommand {
 export class VerifyEmailUseCase {
   constructor(
     @Inject('UserRepository') private readonly userRepository: UserRepository,
-    @Inject('VerificationCodeRepository') private readonly verificationCodeRepository: VerificationCodeRepository
+    @Inject('VerificationCodeRepository')
+    private readonly verificationCodeRepository: VerificationCodeRepository,
   ) {}
 
   async execute(command: VerifyEmailCommand): Promise<void> {
@@ -28,7 +29,11 @@ export class VerifyEmailUseCase {
     }
 
     // 인증 코드 조회
-    const verificationCode = await this.verificationCodeRepository.findByUserIdAndCode(userId, command.code);
+    const verificationCode =
+      await this.verificationCodeRepository.findByUserIdAndCode(
+        userId,
+        command.code,
+      );
     if (!verificationCode) {
       throw new Error('유효하지 않은 인증 코드입니다');
     }
@@ -44,7 +49,7 @@ export class VerifyEmailUseCase {
     // 변경사항 저장
     await Promise.all([
       this.userRepository.save(activatedUser),
-      this.verificationCodeRepository.deleteByUserId(userId)
+      this.verificationCodeRepository.deleteByUserId(userId),
     ]);
   }
 }

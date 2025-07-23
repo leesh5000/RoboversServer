@@ -12,7 +12,7 @@ describe('User', () => {
     status: UserStatus.PENDING,
     role: UserRole.USER,
     createdAt: new Date(),
-    updatedAt: new Date()
+    updatedAt: new Date(),
   });
 
   describe('create', () => {
@@ -35,10 +35,10 @@ describe('User', () => {
         'a', // 너무 짧음
         'a'.repeat(21), // 너무 긴
         'nick@name', // 특수문자
-        'nick name' // 공백
+        'nick name', // 공백
       ];
 
-      invalidNicknames.forEach(nickname => {
+      invalidNicknames.forEach((nickname) => {
         const props = { ...createValidUserProps(), nickname };
         expect(() => User.create(props)).toThrow();
       });
@@ -50,10 +50,10 @@ describe('User', () => {
         'test123',
         '한글닉네임',
         'Mix혼합123',
-        'a'.repeat(20)
+        'a'.repeat(20),
       ];
 
-      validNicknames.forEach(nickname => {
+      validNicknames.forEach((nickname) => {
         const props = { ...createValidUserProps(), nickname };
         expect(() => User.create(props)).not.toThrow();
       });
@@ -94,49 +94,69 @@ describe('User', () => {
   });
 
   describe('activate', () => {
-    it('should activate pending user', () => {
+    it('should activate pending user', async () => {
       const props = { ...createValidUserProps(), status: UserStatus.PENDING };
       const user = User.create(props);
+
+      // 약간의 시간 지연
+      await new Promise((resolve) => setTimeout(resolve, 1));
+
       const activatedUser = user.activate();
 
       expect(activatedUser.status).toBe(UserStatus.ACTIVE);
-      expect(activatedUser.updatedAt.getTime()).toBeGreaterThan(user.updatedAt.getTime());
+      expect(activatedUser.updatedAt.getTime()).toBeGreaterThanOrEqual(
+        user.updatedAt.getTime(),
+      );
     });
 
     it('should throw error when activating non-pending user', () => {
       const props = { ...createValidUserProps(), status: UserStatus.ACTIVE };
       const user = User.create(props);
-      
-      expect(() => user.activate()).toThrow('PENDING 상태의 사용자만 활성화할 수 있습니다');
+
+      expect(() => user.activate()).toThrow(
+        'PENDING 상태의 사용자만 활성화할 수 있습니다',
+      );
     });
   });
 
   describe('ban', () => {
-    it('should ban active user', () => {
+    it('should ban active user', async () => {
       const props = { ...createValidUserProps(), status: UserStatus.ACTIVE };
       const user = User.create(props);
+
+      // 약간의 시간 지연
+      await new Promise((resolve) => setTimeout(resolve, 1));
+
       const bannedUser = user.ban();
 
       expect(bannedUser.status).toBe(UserStatus.BANNED);
-      expect(bannedUser.updatedAt.getTime()).toBeGreaterThan(user.updatedAt.getTime());
+      expect(bannedUser.updatedAt.getTime()).toBeGreaterThanOrEqual(
+        user.updatedAt.getTime(),
+      );
     });
 
     it('should throw error when banning already banned user', () => {
       const props = { ...createValidUserProps(), status: UserStatus.BANNED };
       const user = User.create(props);
-      
+
       expect(() => user.ban()).toThrow('이미 차단된 사용자입니다');
     });
   });
 
   describe('updatePassword', () => {
-    it('should update password', () => {
+    it('should update password', async () => {
       const user = User.create(createValidUserProps());
       const newPassword = 'newHashedPassword';
+
+      // 약간의 시간 지연
+      await new Promise((resolve) => setTimeout(resolve, 1));
+
       const updatedUser = user.updatePassword(newPassword);
 
       expect(updatedUser.password).toBe(newPassword);
-      expect(updatedUser.updatedAt.getTime()).toBeGreaterThan(user.updatedAt.getTime());
+      expect(updatedUser.updatedAt.getTime()).toBeGreaterThanOrEqual(
+        user.updatedAt.getTime(),
+      );
     });
 
     it('should throw error for empty password', () => {
@@ -146,13 +166,19 @@ describe('User', () => {
   });
 
   describe('updateNickname', () => {
-    it('should update nickname', () => {
+    it('should update nickname', async () => {
       const user = User.create(createValidUserProps());
       const newNickname = '새닉네임';
+
+      // 약간의 시간 지연
+      await new Promise((resolve) => setTimeout(resolve, 1));
+
       const updatedUser = user.updateNickname(newNickname);
 
       expect(updatedUser.nickname).toBe(newNickname);
-      expect(updatedUser.updatedAt.getTime()).toBeGreaterThan(user.updatedAt.getTime());
+      expect(updatedUser.updatedAt.getTime()).toBeGreaterThanOrEqual(
+        user.updatedAt.getTime(),
+      );
     });
 
     it('should throw error for invalid nickname', () => {

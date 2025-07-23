@@ -18,19 +18,25 @@ export interface UserLoginResult {
 export class UserLoginUseCase {
   constructor(
     @Inject('UserRepository') private readonly userRepository: UserRepository,
-    @Inject('PasswordService') private readonly passwordService: PasswordService,
-    @Inject('JwtService') private readonly jwtService: JwtService
+    @Inject('PasswordService')
+    private readonly passwordService: PasswordService,
+    @Inject('JwtService') private readonly jwtService: JwtService,
   ) {}
 
   async execute(command: UserLoginCommand): Promise<UserLoginResult> {
     // 사용자 조회
-    const user = await this.userRepository.findByEmail(command.email.toLowerCase());
+    const user = await this.userRepository.findByEmail(
+      command.email.toLowerCase(),
+    );
     if (!user) {
       throw new Error('이메일 또는 비밀번호가 올바르지 않습니다');
     }
 
     // 비밀번호 검증
-    const isPasswordValid = await this.passwordService.verify(command.password, user.password);
+    const isPasswordValid = await this.passwordService.verify(
+      command.password,
+      user.password,
+    );
     if (!isPasswordValid) {
       throw new Error('이메일 또는 비밀번호가 올바르지 않습니다');
     }
@@ -50,7 +56,7 @@ export class UserLoginUseCase {
     const accessToken = this.jwtService.sign({
       userId: user.id.toString(),
       email: user.email.getValue(),
-      role: user.role
+      role: user.role,
     });
 
     return {
@@ -58,7 +64,7 @@ export class UserLoginUseCase {
       userId: user.id.toString(),
       email: user.email.getValue(),
       nickname: user.nickname,
-      role: user.role
+      role: user.role,
     };
   }
 }

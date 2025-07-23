@@ -1,6 +1,17 @@
 import { Injectable, Inject } from '@nestjs/common';
-import { User, UserEmail, UserStatus, UserRole, VerificationCode } from '../../domain';
-import { UserRepository, VerificationCodeRepository, EmailService, PasswordService } from '../ports';
+import {
+  User,
+  UserEmail,
+  UserStatus,
+  UserRole,
+  VerificationCode,
+} from '../../domain';
+import {
+  UserRepository,
+  VerificationCodeRepository,
+  EmailService,
+  PasswordService,
+} from '../ports';
 import { SnowflakeFactory, NodeIdStrategy } from '@robovers/common/snowflake';
 
 export interface UserSignUpCommand {
@@ -17,13 +28,17 @@ export interface UserSignUpResult {
 
 @Injectable()
 export class UserSignUpUseCase {
-  private readonly snowflakeGenerator = SnowflakeFactory.create(NodeIdStrategy.ENVIRONMENT);
+  private readonly snowflakeGenerator = SnowflakeFactory.create(
+    NodeIdStrategy.ENVIRONMENT,
+  );
 
   constructor(
     @Inject('UserRepository') private readonly userRepository: UserRepository,
-    @Inject('VerificationCodeRepository') private readonly verificationCodeRepository: VerificationCodeRepository,
+    @Inject('VerificationCodeRepository')
+    private readonly verificationCodeRepository: VerificationCodeRepository,
     @Inject('EmailService') private readonly emailService: EmailService,
-    @Inject('PasswordService') private readonly passwordService: PasswordService
+    @Inject('PasswordService')
+    private readonly passwordService: PasswordService,
   ) {}
 
   async execute(command: UserSignUpCommand): Promise<UserSignUpResult> {
@@ -33,7 +48,7 @@ export class UserSignUpUseCase {
     // 중복 검사
     const [emailExists, nicknameExists] = await Promise.all([
       this.userRepository.existsByEmail(email.getValue()),
-      this.userRepository.existsByNickname(command.nickname)
+      this.userRepository.existsByNickname(command.nickname),
     ]);
 
     if (emailExists) {
@@ -56,23 +71,31 @@ export class UserSignUpUseCase {
       status: UserStatus.PENDING,
       role: UserRole.USER,
       createdAt: new Date(),
-      updatedAt: new Date()
+      updatedAt: new Date(),
     });
 
     // 인증 코드 생성
-    const verificationCode = VerificationCode.generate();
+    const verificationCodeId = `${user.id}_${Date.now()}`;
+    const verificationCode = VerificationCode.generate(verificationCodeId);
 
     // 저장
     await Promise.all([
       this.userRepository.save(user),
-      this.verificationCodeRepository.save(user.id, verificationCode),
-      this.emailService.sendVerificationEmail(email.getValue(), verificationCode.getValue())
+      this.verificationCodeRepository.saveWithEmailRateLimit(
+        user.id,
+        email.getValue(),
+        verificationCode,
+      ),
+      this.emailService.sendVerificationEmail(
+        email.getValue(),
+        verificationCode.getValue(),
+      ),
     ]);
 
     return {
       userId: user.id.toString(),
       email: user.email.getValue(),
-      nickname: user.nickname
+      nickname: user.nickname,
     };
   }
 }

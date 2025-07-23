@@ -24,7 +24,9 @@ describe('UserEmail', () => {
 
     it('should throw error for email exceeding max length', () => {
       const longEmail = 'a'.repeat(250) + '@example.com';
-      expect(() => UserEmail.create(longEmail)).toThrow('이메일은 255자를 초과할 수 없습니다');
+      expect(() => UserEmail.create(longEmail)).toThrow(
+        '이메일은 255자를 초과할 수 없습니다',
+      );
     });
 
     it('should throw error for invalid email format', () => {
@@ -36,11 +38,13 @@ describe('UserEmail', () => {
         'test@example',
         'test.example.com',
         'test@example..com',
-        'test@exam ple.com'
+        'test@exam ple.com',
       ];
 
-      invalidEmails.forEach(invalidEmail => {
-        expect(() => UserEmail.create(invalidEmail)).toThrow('유효하지 않은 이메일 형식입니다');
+      invalidEmails.forEach((invalidEmail) => {
+        expect(() => UserEmail.create(invalidEmail)).toThrow(
+          '유효하지 않은 이메일 형식입니다',
+        );
       });
     });
 
@@ -50,10 +54,10 @@ describe('UserEmail', () => {
         'user.name@example.com',
         'user+tag@example.co.kr',
         'user_name@example-domain.com',
-        '123@example.com'
+        '123@example.com',
       ];
 
-      validEmails.forEach(validEmail => {
+      validEmails.forEach((validEmail) => {
         expect(() => UserEmail.create(validEmail)).not.toThrow();
       });
     });

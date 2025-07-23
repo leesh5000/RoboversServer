@@ -1,18 +1,21 @@
 export class UserEmail {
-  private static readonly EMAIL_REGEX = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
+  private static readonly EMAIL_REGEX =
+    /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9]([a-zA-Z0-9-]*[a-zA-Z0-9])?(\.[a-zA-Z0-9]([a-zA-Z0-9-]*[a-zA-Z0-9])?)*\.[a-zA-Z]{2,}$/;
   private static readonly MAX_LENGTH = 255;
 
   private constructor(private readonly value: string) {}
 
   public static create(email: string): UserEmail {
     const normalizedEmail = email.toLowerCase().trim();
-    
+
     if (!normalizedEmail) {
       throw new Error('이메일은 필수입니다');
     }
 
     if (normalizedEmail.length > UserEmail.MAX_LENGTH) {
-      throw new Error(`이메일은 ${UserEmail.MAX_LENGTH}자를 초과할 수 없습니다`);
+      throw new Error(
+        `이메일은 ${UserEmail.MAX_LENGTH}자를 초과할 수 없습니다`,
+      );
     }
 
     if (!UserEmail.EMAIL_REGEX.test(normalizedEmail)) {
